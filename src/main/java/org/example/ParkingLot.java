@@ -1,8 +1,7 @@
 package org.example;
 
-import org.example.exceptions.SpaceNotAvailableException;
-import org.example.exceptions.VehicleAlreadyParkedException;
-import org.example.exceptions.VehicleNotFoundException;
+import org.example.exceptions.ParkingNotPossibleException;
+import org.example.exceptions.UnparkingNotPossible;
 import org.example.vehicle.Vehicle;
 
 import java.util.List;
@@ -26,32 +25,40 @@ public class ParkingLot {
         return vehicles;
     }
 
-    public double parkVehicle(Vehicle vehicle) throws SpaceNotAvailableException, VehicleAlreadyParkedException {
-        validateParkingPossible(vehicle);
+    public double parkVehicle(Vehicle vehicle) throws ParkingNotPossibleException {
+        ParkingError parkingStatus = isParkingPossible(vehicle);
+        if (!parkingStatus.isPossible()) {
+            throw new ParkingNotPossibleException(parkingStatus.getStatus());
+        }
         setAvailableSpace(this.availableSpace - vehicle.getSlotsRequired());
         this.vehicles.add(vehicle);
         return this.availableSpace;
     }
 
-    private void validateParkingPossible(Vehicle vehicle) throws SpaceNotAvailableException, VehicleAlreadyParkedException {
+    private ParkingError isParkingPossible(Vehicle vehicle) {
         if (this.vehicles.contains(vehicle)) {
-            throw new VehicleAlreadyParkedException("Vehicle already present");
+            return new ParkingError(false, ParkingStatus.VEHICLE_PRESENT);
         }
         if (this.availableSpace - vehicle.getSlotsRequired() < 0) {
-            throw new SpaceNotAvailableException("Parking Lot Full");
+            return new ParkingError(false, ParkingStatus.SPACE_UNAVAILABLE);
         }
+        return new ParkingError(true, ParkingStatus.POSSIBLE);
     }
 
-    public double unParkVehicle(Vehicle vehicle) throws VehicleNotFoundException {
-        validateVehiclePresentToUnpark(vehicle);
+    public double unParkVehicle(Vehicle vehicle) throws UnparkingNotPossible {
+        ParkingError unParkingStatus = isUnparkingPossible(vehicle);
+        if (!unParkingStatus.isPossible()) {
+            throw new UnparkingNotPossible(unParkingStatus.getStatus());
+        }
         this.vehicles.remove(vehicle);
         setAvailableSpace(this.availableSpace + vehicle.getSlotsRequired());
         return this.availableSpace;
     }
 
-    private void validateVehiclePresentToUnpark(Vehicle vehicle) throws VehicleNotFoundException {
+    private ParkingError isUnparkingPossible(Vehicle vehicle) {
         if (!vehicles.contains(vehicle)) {
-            throw new VehicleNotFoundException("Vehicle Not Found");
+            return new ParkingError(false, ParkingStatus.VEHICLE_ABSENT);
         }
+        return new ParkingError(true, ParkingStatus.POSSIBLE);
     }
 }

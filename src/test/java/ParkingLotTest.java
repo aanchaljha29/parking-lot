@@ -1,7 +1,6 @@
 import org.example.ParkingLot;
-import org.example.exceptions.SpaceNotAvailableException;
-import org.example.exceptions.VehicleAlreadyParkedException;
-import org.example.exceptions.VehicleNotFoundException;
+import org.example.exceptions.UnparkingNotPossible;
+import org.example.exceptions.ParkingNotPossibleException;
 import org.example.vehicle.Bike;
 import org.example.vehicle.Car;
 import org.example.vehicle.Minibus;
@@ -32,7 +31,7 @@ public class ParkingLotTest {
     }
 
     @Test
-    void shouldBeAbleToParkAVehicle() throws SpaceNotAvailableException, VehicleAlreadyParkedException {
+    void shouldBeAbleToParkAVehicle() throws ParkingNotPossibleException {
         double spaceAvailableAfterParking = parkingLot.parkVehicle(miniBus);
 
         assertEquals(3, spaceAvailableAfterParking);
@@ -40,25 +39,25 @@ public class ParkingLotTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenSpaceNotAvailableWhenParkingAVehicle() throws SpaceNotAvailableException, VehicleAlreadyParkedException {
+    void shouldThrowExceptionWhenSpaceNotAvailableWhenParkingAVehicle() throws ParkingNotPossibleException {
         parkingLot = new ParkingLot(1, vehicles);
         double spaceAvailableAfterParking = parkingLot.parkVehicle(bike);
 
         assertEquals(spaceAvailableAfterParking, 0.5);
-        assertThrows(SpaceNotAvailableException.class, () -> parkingLot.parkVehicle(car));
+        assertThrows(ParkingNotPossibleException.class, () -> parkingLot.parkVehicle(car));
     }
 
     @Test
-    void shouldThrowExceptionWhenVehicleAlreadyParked() throws SpaceNotAvailableException, VehicleAlreadyParkedException {
+    void shouldThrowExceptionWhenVehicleAlreadyParked() throws ParkingNotPossibleException {
         parkingLot = new ParkingLot(1, vehicles);
         double spaceAvailableAfterParking = parkingLot.parkVehicle(bike);
 
         assertEquals(spaceAvailableAfterParking, 0.5);
-        assertThrows(VehicleAlreadyParkedException.class, () -> parkingLot.parkVehicle(bike));
+        assertThrows(ParkingNotPossibleException.class, () -> parkingLot.parkVehicle(bike));
     }
 
     @Test
-    void shouldBeAbleToUnParkAVehicle() throws SpaceNotAvailableException, VehicleNotFoundException, VehicleAlreadyParkedException {
+    void shouldBeAbleToUnParkAVehicle() throws UnparkingNotPossible, ParkingNotPossibleException {
         double spaceAvailableAfterParking = parkingLot.parkVehicle(car);
         assertEquals(4, spaceAvailableAfterParking);
 
@@ -68,6 +67,6 @@ public class ParkingLotTest {
 
     @Test
     void shouldThrowExceptionWhenTryingToUnParkAVehicleWhichIsNotPresent() {
-        assertThrows(VehicleNotFoundException.class, () -> parkingLot.unParkVehicle(car));
+        assertThrows(UnparkingNotPossible.class, () -> parkingLot.unParkVehicle(car));
     }
 }
