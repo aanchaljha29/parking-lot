@@ -13,7 +13,7 @@ public class ParkingError {
     }
 
     public boolean isPossible() {
-        return isPossible;
+        return !isPossible;
     }
 
     public String getStatus() {
