@@ -9,7 +9,6 @@
 - As a minibus passenger, when I come to park my vehicle then I should get two parking slots to park my vehicle
 
 #### Stories v3
-- As a passenger, i can pay in any currency
 - As a passenger, when I park my vehicle then I should get a receipt with my allocated slot number
 - As a passenger, when I unpack my vehicle then respective slot should be available again
 - As a passenger, I should get an error if trying to unpark the vehicle on the slot which is not occupied
