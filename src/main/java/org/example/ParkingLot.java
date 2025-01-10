@@ -7,72 +7,71 @@ import org.example.vehicle.Vehicle;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ParkingLot {
+public class ParkingLot implements IParkingLot {
     private final List<ParkingSlot> parkingSlots;
 
-    public ParkingLot(int availableSpace) {
+    private final SlotAllocationStrategy slotAllocationStrategy;
+
+    public ParkingLot(int availableSpace, SlotAllocationStrategy slotAllocationStrategy) {
         this.parkingSlots = new ArrayList<>();
         for (int slot = 0; slot < availableSpace; slot++) {
             boolean nearLift = slot % 5 == 0;
             parkingSlots.add(new ParkingSlot((int) (Math.random() * availableSpace), nearLift));
         }
+        this.slotAllocationStrategy = slotAllocationStrategy;
     }
 
+    @Override
     public Receipt parkVehicle(Vehicle vehicle, boolean isNearLift) throws ParkingNotPossibleException {
-        ParkingSlot slot = allocateSlot(parkingSlots, isNearLift);
-        ParkingError parkingStatus = isParkingPossible(vehicle);
-        if (parkingStatus.isPossible()) {
+        ParkingStatus parkingStatus = isParkingPossible(vehicle);
+        if (parkingStatus.isNotPossible()) {
             throw new ParkingNotPossibleException(parkingStatus.getStatus());
         }
-        slot.parkVehicle(vehicle);
-        return new Receipt(slot.getSlotId(), vehicle.getVehicleNo(), LocalDateTime.now(), null);
+        List<ParkingSlot> allocatedSlots = slotAllocationStrategy.allocate(vehicle, parkingSlots, isNearLift);
+        if (allocatedSlots == null) {
+            throw new ParkingNotPossibleException(ParkingError.SPACE_UNAVAILABLE.toString());
+        }
+        for (ParkingSlot slot : allocatedSlots) {
+            slot.parkVehicle(vehicle);
+        }
+        return new Receipt(allocatedSlots, vehicle.getVehicleNo(), LocalDateTime.now(), null);
     }
 
-    public ParkingSlot allocateSlot(List<ParkingSlot> parkingSlots, boolean isNearLift) {
-        return parkingSlots.stream()
-                .filter(slot -> !slot.isOccupied() && (!isNearLift || slot.isNearLift()))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private ParkingError isParkingPossible(Vehicle vehicle) {
-        ParkingSlot slotWithSameVehicle = parkingSlots.stream()
-                .filter(vehicleSlot -> vehicleSlot.getVehicle() != null
+    private ParkingStatus isParkingPossible(Vehicle vehicle) {
+        ParkingSlot slot = parkingSlots.stream()
+                .filter(vehicleSlot -> vehicleSlot.isOccupied()
                         && vehicleSlot.getVehicle().equals(vehicle))
                 .findFirst()
                 .orElse(null);
-        if (slotWithSameVehicle != null) {
-            return new ParkingError(false, ParkingStatus.VEHICLE_PRESENT);
+        if (slot != null) {
+            return new ParkingStatus(false, ParkingError.VEHICLE_PRESENT);
         }
-        //TODO:Size take into account
-//        if (slotWithSameVehicle == null) {
-//            return new ParkingError(false, ParkingStatus.SPACE_UNAVAILABLE);
-//        }
-        return new ParkingError(true, ParkingStatus.POSSIBLE);
+        return new ParkingStatus(true, ParkingError.POSSIBLE);
     }
 
+    @Override
     public Receipt unParkVehicle(Receipt receipt) throws UnparkingNotPossible {
-        ParkingSlot slot = parkingSlots.stream()
-                .filter(parkingSlot -> parkingSlot.getSlotId() == receipt.slotNo()
-                        && parkingSlot.getVehicle() != null
-                        && parkingSlot.getVehicle().getVehicleNo().equals(receipt.vehicleNo()))
-                .findFirst()
-                .orElse(null);
-        ParkingError unParkingStatus = isUnparkingPossible(slot);
-        if (unParkingStatus.isPossible()) {
+        List<ParkingSlot> slotsToUnpark = parkingSlots.stream()
+                .filter(slot -> receipt.slots().contains(slot)
+                        && slot.isOccupied()
+                        && slot.getVehicle().getVehicleNo().equals(receipt.vehicleNo()))
+                .collect(Collectors.toList());
+        ParkingStatus unParkingStatus = isUnparkingPossible(slotsToUnpark);
+        if (unParkingStatus.isNotPossible()) {
             throw new UnparkingNotPossible(unParkingStatus.getStatus());
         }
-        if (slot != null) {
+        for (ParkingSlot slot : slotsToUnpark) {
             slot.unParkVehicle();
         }
-        return new Receipt(receipt.slotNo(), receipt.vehicleNo(), receipt.parkedAt(), LocalDateTime.now());
+        return new Receipt(receipt.slots(), receipt.vehicleNo(), receipt.parkedAt(), LocalDateTime.now());
     }
 
-    private ParkingError isUnparkingPossible(ParkingSlot slot) {
-        if (slot == null) {
-            return new ParkingError(false, ParkingStatus.VEHICLE_ABSENT);
+    private ParkingStatus isUnparkingPossible(List<ParkingSlot> slots) {
+        if (slots == null || slots.isEmpty()) {
+            return new ParkingStatus(false, ParkingError.VEHICLE_ABSENT);
         }
-        return new ParkingError(true, ParkingStatus.POSSIBLE);
+        return new ParkingStatus(true, ParkingError.POSSIBLE);
     }
 }

@@ -6,16 +6,11 @@ public class ParkingSlot {
     private final int slotId;
     private final boolean isNearLift;
     private boolean isOccupied;
-
     private Vehicle vehicle;
 
     public ParkingSlot(int slotId, boolean isNearLift) {
         this.slotId = slotId;
         this.isNearLift = isNearLift;
-    }
-
-    public int getSlotId() {
-        return slotId;
     }
 
     public Vehicle getVehicle() {
@@ -30,6 +25,7 @@ public class ParkingSlot {
         return isOccupied;
     }
 
+    //TODO: code smell, I tried i don't know, lame to return boolean here
     public void parkVehicle(Vehicle vehicle) {
         this.isOccupied = true;
         this.vehicle = vehicle;
