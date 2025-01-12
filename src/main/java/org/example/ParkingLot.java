@@ -18,7 +18,7 @@ public class ParkingLot implements IParkingLot {
         this.parkingSlots = new ArrayList<>();
         for (int slot = 0; slot < availableSpace; slot++) {
             boolean nearLift = slot % 5 == 0;
-            parkingSlots.add(new ParkingSlot((int) (Math.random() * availableSpace), nearLift));
+            parkingSlots.add(new ParkingSlot("1", nearLift));
         }
         this.slotAllocationStrategy = slotAllocationStrategy;
     }

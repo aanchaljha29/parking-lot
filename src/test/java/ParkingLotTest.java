@@ -66,7 +66,7 @@ public class ParkingLotTest {
 
     @Test
     void shouldThrowExceptionWhenTryingToUnParkAVehicleWhichIsNotPresent() {
-        Receipt fakeReceipt = new Receipt(List.of(new ParkingSlot(1, false)), "123", LocalDateTime.now(), null);
+        Receipt fakeReceipt = new Receipt(List.of(new ParkingSlot("1", false)), "123", LocalDateTime.now(), null);
 
         assertThrows(UnparkingNotPossible.class, () -> parkingLot.unParkVehicle(fakeReceipt));
     }
