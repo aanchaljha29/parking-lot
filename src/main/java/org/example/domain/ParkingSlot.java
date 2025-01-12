@@ -1,4 +1,4 @@
-package org.example;
+package org.example.domain;
 
 import org.example.exceptions.ParkingNotPossibleException;
 import org.example.exceptions.UnparkingNotPossible;
@@ -15,7 +15,7 @@ public class ParkingSlot {
         this.isNearLift = isNearLift;
     }
 
-    private ParkingSlot(final String slotId, final boolean isNearLift, final boolean isOccupied, final Vehicle parkedVehicle) {
+    public ParkingSlot(final String slotId, final boolean isNearLift, final boolean isOccupied, final Vehicle parkedVehicle) {
         this.slotId = slotId;
         this.isNearLift = isNearLift;
         this.isOccupied = isOccupied;
@@ -24,6 +24,10 @@ public class ParkingSlot {
 
     public Vehicle getVehicle() {
         return this.vehicle;
+    }
+
+    public String getSlotId() {
+        return this.slotId;
     }
 
     public boolean isNearLift() {
@@ -46,6 +50,14 @@ public class ParkingSlot {
             throw new UnparkingNotPossible("Slot " + this.slotId + " is already vacant.");
         }
         return new ParkingSlot(this.slotId, this.isNearLift, false, null);
+    }
+
+    public boolean canPark(Vehicle vehicle) {
+        return !this.isOccupied && !this.isVehicleAlreadyParked(vehicle);
+    }
+
+    public boolean isVehicleAlreadyParked(Vehicle vehicle) {
+        return this.vehicle != null && this.vehicle.equals(vehicle);
     }
 
 }

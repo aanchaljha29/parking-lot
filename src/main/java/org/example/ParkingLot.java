@@ -1,7 +1,12 @@
 package org.example;
 
+import org.example.domain.ParkingSlot;
+import org.example.domain.SlotAllocationStrategy;
 import org.example.exceptions.ParkingNotPossibleException;
 import org.example.exceptions.UnparkingNotPossible;
+import org.example.model.ParkingError;
+import org.example.model.ParkingStatus;
+import org.example.model.Receipt;
 import org.example.vehicle.Vehicle;
 
 import java.time.LocalDateTime;
@@ -10,9 +15,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ParkingLot implements IParkingLot {
+//    private final String parkingLotId;
     private final List<ParkingSlot> parkingSlots;
-
     private final SlotAllocationStrategy slotAllocationStrategy;
+
 
     public ParkingLot(int availableSpace, SlotAllocationStrategy slotAllocationStrategy) {
         this.parkingSlots = new ArrayList<>();

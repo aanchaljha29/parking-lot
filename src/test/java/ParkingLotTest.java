@@ -1,7 +1,7 @@
-import org.example.CombinedAllocationStrategy;
+import org.example.domain.CombinedAllocationStrategy;
 import org.example.ParkingLot;
-import org.example.ParkingSlot;
-import org.example.Receipt;
+import org.example.domain.ParkingSlot;
+import org.example.model.Receipt;
 import org.example.exceptions.UnparkingNotPossible;
 import org.example.exceptions.ParkingNotPossibleException;
 import org.example.vehicle.Bike;

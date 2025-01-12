@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.domain.ParkingSlot;
 import org.example.exceptions.ParkingNotPossibleException;
 import org.example.exceptions.UnparkingNotPossible;
 import org.example.vehicle.Bike;
