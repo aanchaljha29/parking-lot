@@ -1,8 +1,8 @@
 package org.example.domain;
 
-import org.example.exceptions.ParkingNotPossibleException;
-import org.example.exceptions.UnparkingNotPossible;
 import org.example.vehicle.Vehicle;
+
+import java.util.Objects;
 
 public class ParkingSlot {
     private final String slotId;
@@ -38,17 +38,11 @@ public class ParkingSlot {
         return this.isOccupied;
     }
 
-    public ParkingSlot parkVehicle(final Vehicle vehicle) throws ParkingNotPossibleException {
-        if (this.isOccupied) {
-            throw new ParkingNotPossibleException("Slot " + this.slotId + " is already occupied.");
-        }
+    public ParkingSlot parkVehicle(final Vehicle vehicle) {
         return new ParkingSlot(this.slotId, this.isNearLift, true, vehicle);
     }
 
-    public ParkingSlot unParkVehicle() throws UnparkingNotPossible {
-        if (!this.isOccupied) {
-            throw new UnparkingNotPossible("Slot " + this.slotId + " is already vacant.");
-        }
+    public ParkingSlot unParkVehicle() {
         return new ParkingSlot(this.slotId, this.isNearLift, false, null);
     }
 
@@ -58,6 +52,21 @@ public class ParkingSlot {
 
     public boolean isVehicleAlreadyParked(Vehicle vehicle) {
         return this.vehicle != null && this.vehicle.equals(vehicle);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ParkingSlot that = (ParkingSlot) o;
+        return isOccupied == that.isOccupied &&
+                Objects.equals(slotId, that.slotId) &&
+                Objects.equals(vehicle, that.vehicle);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(slotId); // Ensures that slots with the same slotId have the same hash code
     }
 
 }

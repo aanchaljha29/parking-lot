@@ -1,8 +1,6 @@
 package org.example;
 
 import org.example.domain.ParkingSlot;
-import org.example.exceptions.ParkingNotPossibleException;
-import org.example.exceptions.UnparkingNotPossible;
 import org.example.vehicle.Bike;
 import org.example.vehicle.Car;
 import org.example.vehicle.Minibus;
@@ -14,12 +12,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ParkingSlotTest {
 
     private ParkingSlot parkingSlot;
-    private Car vehicle;
+    private Car car;
 
     @BeforeEach
     void setUp() {
         parkingSlot = new ParkingSlot("SLOT-001", true);
-        vehicle = new Car("KA-01-1234");
+        car = new Car("KA-01-1234");
     }
 
     @Test
@@ -30,27 +28,17 @@ class ParkingSlotTest {
     }
 
     @Test
-    void shouldParkVehicleSuccessfully() throws ParkingNotPossibleException {
-        ParkingSlot updatedSlot = parkingSlot.parkVehicle(vehicle);
+    void shouldParkVehicleSuccessfullyAndReturnUpdatedSlot() {
+        ParkingSlot updatedSlot = parkingSlot.parkVehicle(car);
 
         assertTrue(updatedSlot.isOccupied());
-        assertEquals(vehicle, updatedSlot.getVehicle());
+        assertEquals(car, updatedSlot.getVehicle());
         assertNotEquals(parkingSlot, updatedSlot);
     }
 
     @Test
-    void shouldThrowExceptionWhenParkingOnOccupiedSlot() throws ParkingNotPossibleException {
-        ParkingSlot updatedSlot = parkingSlot.parkVehicle(vehicle);
-
-        ParkingNotPossibleException exception = assertThrows(ParkingNotPossibleException.class,
-                () -> updatedSlot.parkVehicle(new Car("KA-02-5678")));
-
-        assertEquals("Slot SLOT-001 is already occupied.", exception.getMessage());
-    }
-
-    @Test
-    void shouldUnParkVehicleSuccessfully() throws ParkingNotPossibleException, UnparkingNotPossible {
-        ParkingSlot occupiedSlot = parkingSlot.parkVehicle(vehicle);
+    void shouldUnParkVehicleSuccessfullyAndReturnUpdatedSlot() {
+        ParkingSlot occupiedSlot = parkingSlot.parkVehicle(car);
         ParkingSlot vacantSlot = occupiedSlot.unParkVehicle();
 
         assertFalse(vacantSlot.isOccupied());
@@ -59,19 +47,50 @@ class ParkingSlotTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenUnParkingFromVacantSlot() {
-        UnparkingNotPossible exception = assertThrows(UnparkingNotPossible.class, () -> {
-            parkingSlot.unParkVehicle();
-        });
-
-        assertEquals("Slot SLOT-001 is already vacant.", exception.getMessage());
+    void shouldAllowParkingWhenSlotIsAvailable() {
+        assertTrue(parkingSlot.canPark(car));
     }
 
     @Test
-    void shouldHandleMultipleParkingAndUnParkingOperations() throws ParkingNotPossibleException, UnparkingNotPossible {
-        ParkingSlot updatedSlot = parkingSlot.parkVehicle(vehicle);
+    void shouldNotAllowParkingWhenSlotIsOccupied() {
+        ParkingSlot occupiedSlot = parkingSlot.parkVehicle(car);
+
+        assertFalse(occupiedSlot.canPark(new Car("CAR-002")));
+    }
+
+    @Test
+    void shouldNotAllowParkingWhenSameVehicleIsAlreadyParked() {
+        ParkingSlot occupiedSlot = parkingSlot.parkVehicle(car);
+        assertFalse(occupiedSlot.canPark(car));
+    }
+
+    @Test
+    void shouldReturnTrueWhenVehicleIsAlreadyParked() {
+        ParkingSlot occupiedSlot = parkingSlot.parkVehicle(car);
+        assertTrue(occupiedSlot.isVehicleAlreadyParked(car));
+    }
+
+    @Test
+    void shouldReturnFalseWhenVehicleIsNotParked() {
+        assertFalse(parkingSlot.isVehicleAlreadyParked(car));
+    }
+
+    @Test
+    void shouldMaintainSlotImmutability() {
+        ParkingSlot updatedSlot = parkingSlot.parkVehicle(car);
+
+        assertFalse(parkingSlot.isOccupied());
+        assertNull(parkingSlot.getVehicle());
+
         assertTrue(updatedSlot.isOccupied());
-        assertEquals(vehicle, updatedSlot.getVehicle());
+        assertEquals(car, updatedSlot.getVehicle());
+    }
+
+    @Test
+    void shouldHandleMultipleParkingAndUnParkingOperations() {
+        ParkingSlot updatedSlot = parkingSlot.parkVehicle(car);
+        assertTrue(updatedSlot.isOccupied());
+        assertEquals(car, updatedSlot.getVehicle());
 
         ParkingSlot vacantSlot = updatedSlot.unParkVehicle();
         assertFalse(vacantSlot.isOccupied());
@@ -83,18 +102,7 @@ class ParkingSlotTest {
     }
 
     @Test
-    void shouldMaintainSlotImmutability() throws ParkingNotPossibleException {
-        ParkingSlot updatedSlot = parkingSlot.parkVehicle(vehicle);
-
-        assertFalse(parkingSlot.isOccupied());
-        assertNull(parkingSlot.getVehicle());
-
-        assertTrue(updatedSlot.isOccupied());
-        assertEquals(vehicle, updatedSlot.getVehicle());
-    }
-
-    @Test
-    void shouldParkDifferentVehicleTypes() throws ParkingNotPossibleException, UnparkingNotPossible {
+    void shouldParkDifferentVehicleTypes() {
         Bike bike = new Bike("KA-02-1111");
         Minibus minibus = new Minibus("KA-04-2222");
 
